@@ -7,13 +7,26 @@ import ErrorHandler from "../utils/utility-class.js";
 
 
 export const createPaymentIntent = TryCatch(async (req, res, next) => {
-    const { amount } = req.body;
+    const { amount,shippingInfo,user } = req.body;
+    const {address,city,state,country,pincode} = shippingInfo
   
     if (!amount) return next(new ErrorHandler("Please enter amount", 400));
+    if (!user || !shippingInfo) return next(new ErrorHandler("Please Provide Customer Name And Address",400))
   
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Number(amount) * 100,
       currency: "inr",
+      description:"Software devlopment services",
+      shipping:{
+        name:user.name,
+        address:{
+            line1:address,
+            city:city,
+            country:country,
+            postal_code:pincode,
+            state:state,
+        }
+      }
     });
   
     return res.status(201).json({
